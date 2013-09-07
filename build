@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# need to be root
+debootstrap --include=iproute --variant=minbase precise precise http://localhost:3142/ubuntu
+mkdir -p precise/{sys,dev/pts}
+touch precise/sbin/init
+chroot precise apt-get clean
+tar -zcvf precise.tar.gz -C precise .
