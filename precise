@@ -32,7 +32,8 @@ case $ARCH in
 esac
 
 work_out_debs () {
-	required="$(get_debs Priority: required)"
+	#required="$(get_debs Priority: required)"
+	required="bash mount base-files base-passwd passwd libc-bin dash findutils sed grep mawk login"
 
 	if doing_variant -; then
 		#required="$required $(get_debs Priority: important)"
