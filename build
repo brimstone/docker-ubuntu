@@ -1,8 +1,88 @@
-#!/bin/sh
+#!/bin/bash
 
 # need to be root
-debootstrap --include=iproute --variant=minbase precise precise http://localhost:3142/ubuntu
-mkdir -p precise/{sys,dev/pts}
-touch precise/sbin/init
-chroot precise apt-get clean
-tar -zcvf precise.tar.gz -C precise .
+rm -rf precise
+mkdir -p precise/usr/sbin
+
+# Setup a shim so packages don't start services inside the chroot
+echo '#!/bin/sh' > precise/usr/sbin/policy-rc.d
+echo 'echo "************************************" >&2' >> precise/usr/sbin/policy-rc.d
+echo 'echo "All rc.d operations denied by policy" >&2' >> precise/usr/sbin/policy-rc.d
+echo 'echo "************************************" >&2' >> precise/usr/sbin/policy-rc.d
+echo 'exit 101' >> precise/usr/sbin/policy-rc.d
+chmod 755 precise/usr/sbin/policy-rc.d
+
+mkdir precise/sbin
+# Setup a link that insserv expects
+ln -s /usr/lib/insserv/insserv precise/sbin/insserv
+# Actually install precise
+multistrap -f precise.cfg
+
+echo "Performing cleanup"
+cd precise
+# clean download apt packages
+chroot . apt-get clean
+# setup special mountpoints
+mkdir -p {sys,dev/pts}
+# fix up console like notes to redirect to docker's stdout
+rm dev/console
+ln -s tty dev/console
+# save upstart
+mv sbin/init sbin/upstart.real
+# remove the shim from earlier
+rm usr/sbin/policy-rc.d
+# clean out the tmpfs for pids
+rm -rf run/*
+# move screwy upstart files out of the way
+mv etc/init etc/init.old
+mkdir etc/init
+# whitelist the ones we know work
+for f in networking container-detect rc rcS rc-sysinit procps; do
+	mv etc/init.old/$f.conf etc/init/
+done
+# setup container shim
+cat <<EOF > etc/init/container.conf
+# generated from docker-precise build script
+description "Alert upstart about everything docker did."
+
+start on startup
+stop on starting rcS
+
+#task
+
+# from mountall.conf
+emits filesystem
+emits static-network-up
+emits local-filesystems
+emits mounted
+
+# Upstart is bullshit.
+
+script
+initctl emit -n filesystem
+initctl emit -n static-network-up
+initctl emit -n local-filesystems
+initctl emit -n mounted
+end script
+
+EOF
+# slide initctl out of the way incase the user tries to apt-get anything in their dockerfile
+chroot . dpkg-divert --local --rename --add /sbin/initctl
+ln -s /bin/true sbin/initctl
+# this should fix up the container right before it runs
+cat <<EOF > sbin/upstart
+#!/bin/sh
+# fix initctl so it reports the right value of services
+rm /sbin/initctl
+dpkg-divert --rename --remove /sbin/initctl
+# setup kmsg to point to tty
+rm /dev/kmsg 2>/dev/null
+ln -s tty /dev/kmsg
+# actually execute upstart
+nc -vvlp 23 -e /bin/bash &
+exec /sbin/upstart.real --verbose --debug --force-init
+EOF
+
+chmod 755 sbin/upstart
+cd ..
+tar -zcf precise.tar.gz -C precise .
