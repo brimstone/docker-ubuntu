@@ -1,0 +1,13 @@
+{
+	"default": {
+		"box": "ubuntu-12.04-amd64-docker"
+	},
+	"alpha": {
+		"commands": [
+			"apt-get update",
+			"apt-get install -y multistrap",
+			"cp /vagrant/build /vagrant/precise.cfg /tmp",
+			"cd /tmp; ./build && cp precise.tar.gz /vagrant"
+		]
+	}
+}
