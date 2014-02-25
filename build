@@ -40,6 +40,9 @@ mkdir etc/init
 for f in networking container-detect rc rcS rc-sysinit procps; do
 	mv etc/init.old/$f.conf etc/init/
 done
+# remove weird sysvinit script
+rm etc/init.d/ondemand
+rm etc/rc*.d/*ondemand
 # setup container shim
 cat <<EOF > etc/init/container.conf
 # generated from docker-precise build script
