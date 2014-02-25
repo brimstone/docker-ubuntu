@@ -82,7 +82,6 @@ dpkg-divert --rename --remove /sbin/initctl >/dev/null
 rm /dev/kmsg 2>/dev/null
 ln -s tty /dev/kmsg
 # actually execute upstart
-nc -vvlp 23 -e /bin/bash &
 exec /sbin/upstart.real --verbose --debug --force-init
 EOF
 
