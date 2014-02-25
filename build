@@ -81,6 +81,17 @@ dpkg-divert --rename --remove /sbin/initctl >/dev/null
 # setup kmsg to point to tty
 rm /dev/kmsg 2>/dev/null
 ln -s tty /dev/kmsg
+[ -n "\$@" ] && cat <<DOG > /etc/init/final.conf
+description "Final script after upstart has loaded everything else."
+
+start on started
+
+task
+
+script
+	\$@
+end script
+DOG
 # actually execute upstart
 exec /sbin/upstart.real --verbose --debug --force-init
 EOF
