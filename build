@@ -77,7 +77,7 @@ cat <<EOF > sbin/upstart
 #!/bin/sh
 # fix initctl so it reports the right value of services
 rm /sbin/initctl
-dpkg-divert --rename --remove /sbin/initctl
+dpkg-divert --rename --remove /sbin/initctl >/dev/null
 # setup kmsg to point to tty
 rm /dev/kmsg 2>/dev/null
 ln -s tty /dev/kmsg
