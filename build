@@ -1,22 +1,22 @@
 #!/bin/bash
 
 # need to be root
-rm -rf precise
-mkdir -p precise/usr/sbin
+rm -rf trusty
+mkdir -p trusty/usr/sbin
 
 # Setup a shim so packages don't start services inside the chroot
-echo '#!/bin/sh' > precise/usr/sbin/policy-rc.d
-echo 'echo "************************************" >&2' >> precise/usr/sbin/policy-rc.d
-echo 'echo "All rc.d operations denied by policy" >&2' >> precise/usr/sbin/policy-rc.d
-echo 'echo "************************************" >&2' >> precise/usr/sbin/policy-rc.d
-echo 'exit 101' >> precise/usr/sbin/policy-rc.d
-chmod 755 precise/usr/sbin/policy-rc.d
+echo '#!/bin/sh' > trusty/usr/sbin/policy-rc.d
+echo 'echo "************************************" >&2' >> trusty/usr/sbin/policy-rc.d
+echo 'echo "All rc.d operations denied by policy" >&2' >> trusty/usr/sbin/policy-rc.d
+echo 'echo "************************************" >&2' >> trusty/usr/sbin/policy-rc.d
+echo 'exit 101' >> trusty/usr/sbin/policy-rc.d
+chmod 755 trusty/usr/sbin/policy-rc.d
 
-mkdir precise/sbin
+mkdir trusty/sbin
 # Setup a link that insserv expects
-ln -s /usr/lib/insserv/insserv precise/sbin/insserv
-# Actually install precise
-multistrap -f precise.cfg
+ln -s /usr/lib/insserv/insserv trusty/sbin/insserv
+# Actually install trusty
+multistrap -f trusty.cfg
 
 echo "Performing cleanup"
 cd precise
@@ -45,7 +45,7 @@ rm etc/init.d/ondemand
 rm etc/rc*.d/*ondemand
 # setup container shim
 cat <<EOF > etc/init/container.conf
-# generated from docker-precise build script
+# generated from docker-trusty build script
 description "Alert upstart about everything docker did."
 
 start on startup
@@ -98,4 +98,4 @@ EOF
 
 chmod 755 sbin/upstart
 cd ..
-tar -zcf precise.tar.gz -C precise .
+tar -zcf trusty.tar.gz -C trusty .

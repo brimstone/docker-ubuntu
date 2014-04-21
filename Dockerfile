@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD precise.tar.gz /
+ADD trusty.tar.gz /
 
 CMD /sbin/upstart

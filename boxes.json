@@ -6,8 +6,8 @@
 		"commands": [
 			"apt-get update",
 			"apt-get install -y multistrap",
-			"cp /vagrant/build /vagrant/precise.cfg /tmp",
-			"cd /tmp; ./build && cp precise.tar.gz /vagrant"
+			"cp /vagrant/build /vagrant/trusty.cfg /tmp",
+			"cd /tmp; ./build && cp trusty.tar.gz /vagrant"
 		]
 	}
 }
