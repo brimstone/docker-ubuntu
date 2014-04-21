@@ -19,7 +19,14 @@ ln -s /usr/lib/insserv/insserv trusty/sbin/insserv
 multistrap -f trusty.cfg
 
 echo "Performing cleanup"
-cd precise
+cd trusty
+# fix base-files error
+ls -l var/run/
+rm var/run/*
+chroot . apt-get -f install
+chroot . dpkg -l | grep -v "^ii"
+echo "END"
+echo
 # clean download apt packages
 chroot . apt-get clean
 # setup special mountpoints
