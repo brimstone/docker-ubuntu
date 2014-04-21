@@ -99,16 +99,22 @@ description "Final script after upstart has loaded everything else."
 
 start on started
 
+env HOME=/
+
 task
 
 script
-	\$@
+	\$@; rm /etc/init/final.conf
 end script
 DOG
 # actually execute upstart
-exec /sbin/upstart.real --verbose --debug --force-init
+exec /sbin/upstart.real --verbose --debug
 EOF
 
 chmod 755 sbin/upstart
+
+# Allow one time containery things to happen at boot in a super simple way:
+: > etc/rc.local
+
 cd ..
 tar -zcf trusty.tar.gz -C trusty .
