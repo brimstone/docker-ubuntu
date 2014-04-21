@@ -47,6 +47,10 @@ mkdir etc/init
 for f in networking container-detect rc rcS rc-sysinit procps; do
 	mv etc/init.old/$f.conf etc/init/
 done
+# Fix up procps so it doesn't exit stupid
+for a in kernel.printk kernel.kptr_restrict kernel.yama.ptrace_scope vm.mmap_min_addr; do
+	sed -i "/$a/d" etc/sysctl.d/*.conf /etc/sysctl.conf
+done
 # remove weird sysvinit script
 rm etc/init.d/ondemand
 rm etc/rc*.d/*ondemand
