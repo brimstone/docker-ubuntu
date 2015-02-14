@@ -1,5 +1,14 @@
-FROM scratch
+FROM brimstone/ubuntu:14.04
 
-ADD trusty.tar.gz /
+RUN apt-get update \
+ && apt-get install -y multistrap
 
-CMD ["/sbin/upstart"]
+RUN sed -i '989 s/$forceyes //' /usr/sbin/multistrap
+
+COPY trusty.cfg /tmp/
+
+COPY build /tmp/
+
+WORKDIR /tmp
+
+RUN ./build

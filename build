@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -x
+set -euo pipefail
+
 # need to be root
 rm -rf trusty
 mkdir -p trusty/usr/sbin
@@ -16,7 +19,7 @@ mkdir trusty/sbin
 # Setup a link that insserv expects
 ln -s /usr/lib/insserv/insserv trusty/sbin/insserv
 # Actually install trusty
-multistrap -f trusty.cfg
+multistrap -f trusty.cfg || true
 
 echo "Performing cleanup"
 cd trusty

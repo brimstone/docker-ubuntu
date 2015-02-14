@@ -1,0 +1,7 @@
+FROM scratch
+
+ADD trusty.tar.gz /
+
+ENTRYPOINT ["/bin/bash"]
+
+CMD []
