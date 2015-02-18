@@ -119,5 +119,9 @@ chmod 755 sbin/upstart
 # Allow one time containery things to happen at boot in a super simple way:
 : > etc/rc.local
 
+
 cd ..
+# copy over any additional files
+cp -a root/* trusty/
+
 tar -zcf trusty.tar.gz -C trusty .

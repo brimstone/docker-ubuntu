@@ -5,6 +5,8 @@ RUN apt-get update \
 
 RUN sed -i '989 s/$forceyes //' /usr/sbin/multistrap
 
+COPY root /tmp/root
+
 COPY trusty.cfg /tmp/
 
 COPY build /tmp/
