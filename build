@@ -1,31 +1,32 @@
 #!/bin/bash
-
 set -x
 set -euo pipefail
 
+distro="$1"
+
 # need to be root
-rm -rf trusty
-mkdir -p trusty/usr/sbin
+rm -rf "$distro"
+mkdir -p "$distro/usr/sbin"
 
 # Setup a shim so packages don't start services inside the chroot
-echo '#!/bin/sh' > trusty/usr/sbin/policy-rc.d
-echo 'echo "************************************" >&2' >> trusty/usr/sbin/policy-rc.d
-echo 'echo "All rc.d operations denied by policy" >&2' >> trusty/usr/sbin/policy-rc.d
-echo 'echo "************************************" >&2' >> trusty/usr/sbin/policy-rc.d
-echo 'exit 101' >> trusty/usr/sbin/policy-rc.d
-chmod 755 trusty/usr/sbin/policy-rc.d
+echo '#!/bin/sh' > "$distro/usr/sbin/policy-rc.d"
+echo 'echo "************************************" >&2' >> "$distro/usr/sbin/policy-rc.d"
+echo 'echo "All rc.d operations denied by policy" >&2' >> "$distro/usr/sbin/policy-rc.d"
+echo 'echo "************************************" >&2' >> "$distro/usr/sbin/policy-rc.d"
+echo 'exit 101' >> "$distro/usr/sbin/policy-rc.d"
+chmod 755 "$distro/usr/sbin/policy-rc.d"
 
-mkdir trusty/sbin
+mkdir "$distro/sbin"
 # Setup a link that insserv expects
-ln -s /usr/lib/insserv/insserv trusty/sbin/insserv
-# Actually install trusty
-multistrap -f trusty.cfg || true
+ln -s /usr/lib/insserv/insserv "$distro/sbin/insserv"
+# Actually install $distro
+multistrap -f "$distro.cfg" || true
 
 echo "Performing cleanup"
-cd trusty
+cd "$distro"
 # fix base-files error
 ls -l var/run/
-rm var/run/*
+rm var/run/* || true
 chroot . apt-get -f install
 chroot . dpkg -l | grep -v "^ii"
 echo "END"
@@ -38,17 +39,19 @@ mkdir -p {sys,dev/pts}
 rm dev/console
 ln -s tty dev/console
 # save upstart
+# TODO is this really sbin/upstart anyway?
 mv sbin/init sbin/upstart.real
 # remove the shim from earlier
 rm usr/sbin/policy-rc.d
 # clean out the tmpfs for pids
 rm -rf run/*
 # move screwy upstart files out of the way
+find etc/init -ls
 mv etc/init etc/init.old
 mkdir etc/init
 # whitelist the ones we know work
 for f in networking container-detect rc rcS rc-sysinit procps; do
-	mv etc/init.old/$f.conf etc/init/
+	[ -e "etc/init.d/$f.conf" ] && mv etc/init.old/$f.conf etc/init/
 done
 # Fix up procps so it doesn't exit stupid
 for a in kernel.printk kernel.kptr_restrict kernel.yama.ptrace_scope vm.mmap_min_addr; do
@@ -122,6 +125,6 @@ chmod 755 sbin/upstart
 
 cd ..
 # copy over any additional files
-cp -a root/* trusty/
+cp -a root/* "$distro/"
 
-tar -zcf trusty.tar.gz -C trusty .
+tar -zcf "$distro.tar.gz" -C "$distro" .

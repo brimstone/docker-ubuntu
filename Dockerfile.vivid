@@ -7,10 +7,10 @@ RUN sed -i '989 s/$forceyes //' /usr/sbin/multistrap
 
 COPY root /tmp/root
 
-COPY trusty.cfg /tmp/
+COPY vivid.cfg /tmp/
 
 COPY build /tmp/
 
 WORKDIR /tmp
 
-RUN ./build
+RUN ./build "vivid"

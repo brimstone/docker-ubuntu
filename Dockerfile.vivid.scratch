@@ -1,0 +1,7 @@
+FROM scratch
+
+ADD vivid.tar.gz /
+
+ENTRYPOINT ["/bin/bash"]
+
+CMD []

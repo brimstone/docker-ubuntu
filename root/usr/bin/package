@@ -2,7 +2,30 @@
 
 set -euo pipefail
 
-apt-get update \
-&& apt-get -y install "$@" \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists
+options=""
+list=""
+apt-get update
+
+if [ "$1" == "-f" ]; then
+	shift
+	options="-y"
+elif [ "$1" == "--list" ]; then
+	list="$2"
+	dpkg -l | awk '/^ii/ {print $2}' > "$list"
+	shift 2
+elif [ "$1" == "-n" ]; then
+	shift
+	options="-n"
+fi
+
+apt-get "$options" install "$@"
+
+apt-get clean
+rm -rf /var/lib/apt/lists || true
+
+if [ -n "$list" ]; then
+	apt-get remove --purge -y $(diff "$list" "$(dpkg -l \
+								| awk '/^ii/ {print $2}')" \
+	| awk '/^>/ {print $2}') 
+	rm "$list"
+fi
