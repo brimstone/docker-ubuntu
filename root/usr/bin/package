@@ -2,13 +2,12 @@
 
 set -euo pipefail
 
-options=""
+options="-y"
 list=""
-apt-get update
 
 if [ "$1" == "-f" ]; then
 	shift
-	options="-y"
+	options="-f -y"
 elif [ "$1" == "--list" ]; then
 	list="$2"
 	dpkg -l | awk '/^ii/ {print $2}' > "$list"
@@ -18,7 +17,9 @@ elif [ "$1" == "-n" ]; then
 	options="-n"
 fi
 
-apt-get "$options" install "$@"
+apt-get update
+
+apt-get $options install "$@"
 
 apt-get clean
 rm -rf /var/lib/apt/lists || true
