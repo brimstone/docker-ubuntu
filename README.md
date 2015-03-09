@@ -1,14 +1,15 @@
 ## Overview
-Build file for trusty docker image with upstart support.
+Build file for trusty or vivid docker image with upstart support.
 
 ## Usage
-Build trusty.tar.gz with vagrant
+Build `brimstone/ubuntu:14.04` with docker:
 ```bash
-build:~ $ vagrant up
+make trusty
 ```
-Build the docker container with trusty.tar.gz and the Dockerfile
+
+Build `brimstone/ubuntu:15.04` with docker:
 ```bash
-docker:~ $ docker build -t ubuntu:14.04 Dockerfile
+make vivid
 ```
 
 ## Dockerfile
