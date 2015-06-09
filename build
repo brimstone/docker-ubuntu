@@ -25,7 +25,7 @@ multistrap -f "$distro.cfg" || true
 echo "Performing cleanup"
 cd "$distro"
 # fix base-files error
-ls -l var/run/
+ls -l var/run/ || true
 rm var/run/* || true
 chroot . apt-get -f install
 chroot . dpkg -l | grep -v "^ii"
